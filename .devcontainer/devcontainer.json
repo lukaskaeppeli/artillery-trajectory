@@ -1,0 +1,9 @@
+{
+	"name": "trajectory_devcontainer",
+	"build": {
+		"dockerfile": "../docker/Dockerfile",
+        "context": "./..",
+        "target": "devcontainer"
+	},
+	"postCreateCommand": "source /opt/venv/bin/activate"
+}
