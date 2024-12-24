@@ -7,13 +7,14 @@ from projectile import Projectile
 from simulator import Simulator
 import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
-
+import sys
+import os
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        ico = Image.open('schneeflocke.png')
+        ico = Image.open(self.resource('schneeflocke.png'))
         photo = ImageTk.PhotoImage(ico)
         self.wm_iconphoto(False, photo)
 
@@ -26,6 +27,13 @@ class App(tk.Tk):
 
         # Initial validation
         self.validate_inputs()
+
+    def resource(self, relative_path):
+        base_path = getattr(
+            sys,
+            '_MEIPASS',
+            os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
 
     def validate_inputs(self):
         """Validate input fields, update button states, and provide feedback."""

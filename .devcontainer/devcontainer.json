@@ -5,5 +5,12 @@
         "context": "./..",
         "target": "devcontainer"
 	},
-	"postCreateCommand": "source /opt/venv/bin/activate"
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-azuretools.vscode-docker"
+			]
+		}
+	}
 }
