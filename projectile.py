@@ -24,8 +24,10 @@ class Projectile:
         """
 
         air_density = environment.get_air_density(point)
-        wind = environment.get_wind(point)
-        wind_relative = self.get_rotation_matrix(self.direction).dot(wind)
+        wind_direction, wind_velocity = environment.get_wind(point)
+
+        angle_relative = (wind_direction - self.direction) * (2 * np.pi / 6400)
+        wind_relative = np.array([wind_velocity * np.cos(angle_relative), 0, wind_velocity * np.sin(angle_relative)])
 
         velocity_absolute = velocity - wind_relative
 
@@ -43,7 +45,7 @@ class Projectile:
         # Axial part
         axial_drag_coefficient = 1.2
         axial_acceleration_magnitude = self.derive_drag_force_magnitude(air_density, velocity_absolute[2], axial_drag_coefficient, self.axial_cross_sectional_area) / self.mass
-        axial_drag_direction = np.array([0, 0, -1])
+        axial_drag_direction = np.array([0, 0, 1]) if velocity_absolute[2] < 0 else np.array([0, 0, -1])
         
         acceleration = (lateral_acceleration_magnitude * lateral_drag_direction) + (axial_acceleration_magnitude * axial_drag_direction)
 
@@ -78,7 +80,7 @@ class Projectile:
 
         Parameters:
         air_density (float): The air density at the point, where the projectile is currently
-        spped (float): Current projectile speed
+        speed (float): Current projectile speed
         drag_coefficient (float): The drag coefficient of the projectile
         area (float): The area that results in the drag force
 
@@ -86,15 +88,3 @@ class Projectile:
         float: The resulting drag force magnitude
         """
         return 0.5 * air_density * speed**2 * drag_coefficient * area
-
-    def get_rotation_matrix(self, angle: float):
-        """
-        Returns the Rotation Matrix around the Z axis: https://en.wikipedia.org/wiki/Rotation_matrix
-
-        Parameters:
-        angle (float): The angle to turn a vector around
-
-        Returns:
-        rotation_matrix (np.array(3x3)): Rotation matrix
-        """
-        return np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])

@@ -60,14 +60,14 @@ class Environment:
         point (np.arry): The point at whose height the wind should be calculated
 
         Returns:
-        np.array: The direction and velocity of the wind
+        float: The direction of the wind in Azimute
+        velocity: The velocity of the wind in m/s
         """
         if self.is_meteo_a_given():
             [_, _, direction, velocity, _] = self.get_linear_interpolation_at(point[1])
-            angle = 100 * direction * (2 * np.pi / 6400)
-            return np.array([velocity * np.sin(angle), 0, velocity * np.cos(angle)])
+            return direction * 100, velocity
         else:
-            return np.array([0, 0, 0])
+            return 0, 0
 
     def get_speed_of_sound(self, point: np.array):
         return 331 + 0.6 * (self.derive_temperature(point) - 273.15)
