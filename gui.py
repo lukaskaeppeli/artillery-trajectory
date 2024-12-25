@@ -97,18 +97,23 @@ class App(tk.Tk):
         y_values = [item[1] for item in points]
         z_values = [item[2] for item in points]
 
-        label = "v0={},phi0={},temp0={},pressure0={}".format(v0, phi0, temp0, pressure0)
+        label = "v0={},phi0={},temp0={},pressure0={},direction={}".format(v0, phi0, temp0, pressure0, direction)
 
+        x_y_figure = plt.figure("x_y")
         plt.plot(x_values, y_values, label=label)
+        plt.title('X / Y ')
+        plt.xlabel('x /m')
+        plt.ylabel('y /m')
+        plt.legend()
+        x_y_figure.show()
+
+        x_z_figure = plt.figure("x_z")
+        plt.plot(x_values, z_values, label=label)
         plt.title('X / Z ')
         plt.xlabel('x /m')
         plt.ylabel('z /m')
         plt.legend()
-        plt.show()
-
-        #ax = plt.axes(projection ='3d')
-        #ax.plot3D(x_values, z_values, y_values)
-        #plt.show()
+        x_z_figure.show()
 
     def update_display(self):
         """Display all datasets in the editable format."""
