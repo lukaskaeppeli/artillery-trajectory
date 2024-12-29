@@ -8,28 +8,29 @@ on:
 
 jobs:
   build:
-    runs-on: tobix/pywine:3.12
+    runs-on: windows-latest
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+    - uses: actions/setup-python@v5
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        python-version: '3.9'
+        architecture: 'x64'
 
-    - name: Install dependencies
-      run: |
-        wine pip install -r /app/requirements.txt 
-
-    - name: Build Artifact
-      run: |
-        wine python -m PyInstaller --add-data /app/schneeflocke.ico:. --icon /app/schneeflocke.ico /app/gui.py
-
-    - name: Upload Built Artifact
-      uses: actions/upload-artifact@v3
+    - uses: Nuitka/Nuitka-Action@main
       with:
-        name: calculator
-        path: dist
+        nuitka-version: main
+        script-name: gui.py
+        mode: standalone
+        enable-plugins: tk-inter
+        windows-icon-from-ico: schneeflocke.ico
+        include-data-files: schneeflocke.ico=schneeflocke.ico
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: exe
+        path: build/gui.exe
+        include-hidden-files: true
