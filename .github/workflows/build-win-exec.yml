@@ -32,5 +32,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: exe
-        path: build/gui.exe
+        path: build/gui.dist/gui.exe
         include-hidden-files: true
