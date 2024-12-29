@@ -23,7 +23,7 @@ jobs:
       with:
         nuitka-version: main
         script-name: gui.py
-        mode: standalone
+        mode: onefile
         mingw64: true
         enable-plugins: tk-inter
         windows-icon-from-ico: schneeflocke.ico
