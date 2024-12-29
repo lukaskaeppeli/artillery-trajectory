@@ -1,6 +1,0 @@
-FROM tobix/pywine:3.12
-
-COPY . /app
-
-RUN wine pip install -r /app/requirements.txt && \
-    wine python -m PyInstaller --add-data /app/schneeflocke.png:. --onefile /app/gui.py

@@ -14,7 +14,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        ico = Image.open(self.resource('schneeflocke.png'))
+        ico = Image.open(self.resource('schneeflocke.ico'))
         photo = ImageTk.PhotoImage(ico)
         self.wm_iconphoto(False, photo)
 
