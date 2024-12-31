@@ -30,9 +30,7 @@ jobs:
         script-name: gui.py
         mode: onefile
         mingw64: true
-        enable-plugins: |
-          tk-inter
-          numpy
+        enable-plugins: tk-inter
         windows-icon-from-ico: schneeflocke.ico
         include-data-files: schneeflocke.ico=schneeflocke.ico
 
