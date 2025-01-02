@@ -1,6 +1,5 @@
-import numpy as np
-
-from meteo_a import MeteoA
+from geometry import Point
+from meteo_a import Measurement, MeteoA
 
 class Environment:
     def __init__(self, temp0: float, pressure0: float, height0: float, meteo_a: MeteoA):
@@ -9,32 +8,30 @@ class Environment:
         self.height0 = height0
         self.meteo_a = meteo_a
 
-    def get_air_density(self, point: np.array):
+    def get_air_density(self, point: Point):
         pressure = self.derive_pressure(point)
         temperature = self.derive_temperature(point)
         return (100 * pressure) / (287.05 * temperature)
 
-    def derive_temperature(self, point: np.array):
+    def derive_temperature(self, point: Point):
         """
         Derives the temperature at the specified point in either the standard athmosphere (when no meteo_a given)
         or by performing linear interpolation between the two nearest measurements contained in the meteo_a.
 
         Parameters:
-        point (np.array): The point at whose height the temerature should be calculated
+        point (Point): The point at whose height the temerature should be calculated
 
         Returns:
         float: The temperature in K
         """
-        height = point[1]
-
         if self.is_meteo_a_given():
-            return self.get_linear_interpolation_at(height)[1] + 273.15
+            return self.get_linear_interpolation_at(point.y).temperature + 273.15
         else:
-            if height > 11000:
+            if point.y > 11000:
                 return 216.65
-            return (273.15 + self.temp0) - 0.0065 * (height - self.height0)
+            return (273.15 + self.temp0) - 0.0065 * (point.y - self.height0)
 
-    def derive_pressure(self, point: np.array):
+    def derive_pressure(self, point: Point):
         """
         Derives the air pressure at a given point.
         # TODO: Only valid up until 11'000
@@ -42,38 +39,38 @@ class Environment:
         # TODO: Given no meteo_a: Take pressure0 into account
 
         Parameters:
-        point (np.array): The point at whose height the pressure should be calculated
+        point (Point): The point at whose height the pressure should be calculated
 
         Returns:
         float: The pressure in hPa
         """
         if self.is_meteo_a_given():
-            return self.pressure0 * pow(1 - (0.0065 * (point[1] - self.height0) / 288.15), 5.255)
+            return self.pressure0 * pow(1 - (0.0065 * (point.y - self.height0) / 288.15), 5.255)
         else:
-            return 1013.25 * pow(1 - (0.0065 * point[1] / 288.15), 5.255)
+            return 1013.25 * pow(1 - (0.0065 * point.y / 288.15), 5.255)
         
-    def get_wind(self, point: np.array):
+    def get_wind(self, point: Point):
         """
         Derives the wind direction and velocity at a given point.
 
         Parameters:
-        point (np.arry): The point at whose height the wind should be calculated
+        point (Point): The point at whose height the wind should be calculated
 
         Returns:
         float: The direction of the wind in Azimute
         velocity: The velocity of the wind in m/s
         """
         if self.is_meteo_a_given():
-            [_, _, direction, velocity, _] = self.get_linear_interpolation_at(point[1])
-            return direction * 100, velocity
+            measurement = self.get_linear_interpolation_at(point.y)
+            return measurement.wind_direction * 100, measurement.wind_velocity
         else:
             return 0, 0
 
-    def get_speed_of_sound(self, point: np.array):
+    def get_speed_of_sound(self, point: Point):
         return 331 + 0.6 * (self.derive_temperature(point) - 273.15)
     
     def is_meteo_a_given(self):
-        return self.meteo_a != None and self.meteo_a.data != None and self.meteo_a.valid
+        return self.meteo_a != None and self.meteo_a.measurements != None
     
     def get_linear_interpolation_at(self, height: float):
         """
@@ -83,34 +80,46 @@ class Environment:
         height (float): The height at which to interpolate the fields.
 
         Returns:
-        np.array: Interpolated values for the fields at the given height.
+        Measurement: Interpolated values for the fields at the given height.
 
         Raises:
         ValueError: If the height is outside the range of the given heights.
         """
-        # Sort the vectors by height (first entry)
-        vectors = np.array(self.meteo_a.data)
-        vectors = vectors[vectors[:, 0].argsort()]
-
-        heights = vectors[:, 0]
-        fields = vectors[:, 1:]
 
         lower_idx = 0
         upper_idx = 0
-        if height < heights[0]:
+
+        # Determine lower and upper indices
+        if height < self.meteo_a.measurements[0].height:
             lower_idx = 0
             upper_idx = 1
-        if height > heights[-1]:
-            lower_idx = len(vectors) - 2
-            lower_idx = len(vectors) - 1
+        elif height > self.meteo_a.measurements[-1].height:
+            lower_idx = len(self.meteo_a.measurements) - 2
+            upper_idx = len(self.meteo_a.measurements) - 1
         else:
-            lower_idx = np.searchsorted(heights, height) - 1
-            upper_idx = lower_idx + 1
+            for i in range(len(self.meteo_a.measurements) - 1):
+                if self.meteo_a.measurements[i].height <= height < self.meteo_a.measurements[i + 1].height:
+                    lower_idx = i
+                    upper_idx = i + 1
+                    break
 
-        h1, h2 = heights[lower_idx], heights[upper_idx]
-        f1, f2 = fields[lower_idx], fields[upper_idx]
+        # Get the two closest objects
+        lower_obj = self.meteo_a.measurements[lower_idx]
+        upper_obj = self.meteo_a.measurements[upper_idx]
 
-        # Linear interpolation for each field
-        interpolated_fields = f1 + (f2 - f1) * ((height - h1) / (h2 - h1))
+        # Heights for interpolation
+        h1, h2 = lower_obj.height, upper_obj.height
 
-        return [height] + interpolated_fields.tolist()
+        # Fields for interpolation
+        interpolated_temperature = lower_obj.temperature + (
+            (upper_obj.temperature - lower_obj.temperature) * (height - h1) / (h2 - h1)
+        )
+        interpolated_wind_direction = lower_obj.wind_direction + (
+            (upper_obj.wind_direction - lower_obj.wind_direction) * (height - h1) / (h2 - h1)
+        )
+        interpolated_wind_velocity = lower_obj.wind_velocity + (
+            (upper_obj.wind_velocity - lower_obj.wind_velocity) * (height - h1) / (h2 - h1)
+        )
+
+        # Return interpolated results
+        return Measurement(height, interpolated_temperature, interpolated_wind_direction, interpolated_wind_velocity)
