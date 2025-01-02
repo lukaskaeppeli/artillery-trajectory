@@ -27,6 +27,7 @@ jobs:
       with:
         nuitka-version: main
         script-name: gui.py
+        output-file: calculator.exe
         mode: onefile
         enable-plugins: tk-inter
         windows-icon-from-ico: schneeflocke.ico
@@ -36,5 +37,11 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: calculator
-        path: build/gui.exe
+        path: build/calculator.exe
         include-hidden-files: true
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: build/calculator.exe
