@@ -6,6 +6,7 @@ from meteo_a import MeteoA
 from projectile import Projectile
 from simulator import Simulator
 import matplotlib.pyplot as plt
+import webbrowser
 from PIL import Image, ImageTk
 import sys
 import os
@@ -151,6 +152,12 @@ class App(tk.Tk):
         # Frame to display datasets
         self.display_frame = tk.Frame(self, bg="#2e2e2e")
         self.display_frame.pack(pady=10)
+
+        self.info_author_label = tk.Label(self, text="Author: Lukas Käppeli (artillerytrajectory@gmail.com)", font=("Helvetica", 12), fg="#f5f5f5", bg="#2e2e2e")
+        self.info_author_label.pack(side="bottom")
+        self.info_repo_label = tk.Label(self, text="Repository: https://github.com/lukaskaeppeli/artillery-trajectory", font=("Helvetica", 12), fg="#f5f5f5", bg="#2e2e2e")
+        self.info_repo_label.pack(side="bottom", pady=10)
+        self.info_repo_label.bind("<Button-1>", lambda e: webbrowser.open_new("https://github.com/lukaskaeppeli/artillery-trajectory"))
 
         # Revalidate inputs on changes
         for entry in [self.base_data_entry1, self.base_data_entry2, self.base_data_entry3, self.base_data_entry4, self.base_data_entry5]:
