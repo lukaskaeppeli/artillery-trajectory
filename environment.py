@@ -1,4 +1,5 @@
 from geometry import Point
+from math import e
 from meteo_a import Measurement, MeteoA
 
 class Environment:
@@ -7,6 +8,9 @@ class Environment:
         self.pressure0 = pressure0
         self.height0 = height0
         self.meteo_a = meteo_a
+        self.air_molar_mass = 0.02896968 # kg/mol
+        self.gas_constant = 8.314462618 # J / (mol * K)
+        self.gravity = 9.80665 # m / s^2
 
     def get_air_density(self, point: Point):
         pressure = self.derive_pressure(point)
@@ -35,7 +39,6 @@ class Environment:
         """
         Derives the air pressure at a given point.
         # TODO: Only valid up until 11'000
-        # TODO: Given meteo_a: Take temperature at point into account
         # TODO: Given no meteo_a: Take pressure0 into account
 
         Parameters:
@@ -45,7 +48,9 @@ class Environment:
         float: The pressure in hPa
         """
         if self.is_meteo_a_given():
-            return self.pressure0 * pow(1 - (0.0065 * (point.y - self.height0) / 288.15), 5.255)
+            temperature = self.get_linear_interpolation_at(point.y).temperature
+            height_difference = point.y - self.height0
+            return self.pressure0 * pow(e, - (self.gravity * self.air_molar_mass * height_difference / (self.gas_constant * (temperature + 273.15))))
         else:
             return 1013.25 * pow(1 - (0.0065 * point.y / 288.15), 5.255)
         
