@@ -39,7 +39,6 @@ class Environment:
         """
         Derives the air pressure at a given point.
         # TODO: Only valid up until 11'000
-        # TODO: Given no meteo_a: Take pressure0 into account
 
         Parameters:
         point (Point): The point at whose height the pressure should be calculated
@@ -47,12 +46,15 @@ class Environment:
         Returns:
         float: The pressure in hPa
         """
+        height_difference = point.y - self.height0
+
         if self.is_meteo_a_given():
             temperature = self.get_linear_interpolation_at(point.y).temperature
-            height_difference = point.y - self.height0
-            return self.pressure0 * pow(e, - (self.gravity * self.air_molar_mass * height_difference / (self.gas_constant * (temperature + 273.15))))
         else:
-            return 1013.25 * pow(1 - (0.0065 * point.y / 288.15), 5.255)
+            temperature = self.temp0 - 0.0065 * height_difference
+
+        return self.pressure0 * pow(e, - (self.gravity * self.air_molar_mass * height_difference / (self.gas_constant * (temperature + 273.15))))
+
         
     def get_wind(self, point: Point):
         """
