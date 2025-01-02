@@ -93,9 +93,9 @@ class App(tk.Tk):
         points = simulator.calculate(v0, phi0, 0.1)
 
         # Extract data for plotting
-        x_values = [item[0] for item in points]
-        y_values = [item[1] for item in points]
-        z_values = [item[2] for item in points]
+        x_values = [item.x for item in points]
+        y_values = [item.y for item in points]
+        z_values = [item.z for item in points]
 
         label = "v0={},phi0={},temp0={},pressure0={},direction={}".format(v0, phi0, temp0, pressure0, direction)
 
