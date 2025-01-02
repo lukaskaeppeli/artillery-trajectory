@@ -38,7 +38,6 @@ class Environment:
     def derive_pressure(self, point: Point):
         """
         Derives the air pressure at a given point.
-        # TODO: Only valid up until 11'000
 
         Parameters:
         point (Point): The point at whose height the pressure should be calculated
