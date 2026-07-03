@@ -3,6 +3,37 @@
 
 Dieses Project stellt einen Flugbahnrechner für die Artillerie zur Verfügung.
 
+## Getting started
+
+### Voraussetzungen
+
+- [Homebrew](https://brew.sh/) (macOS)
+- Python 3.12 inkl. Tkinter-Unterstützung
+
+### Installation
+
+**1. Python 3.12 und Tkinter installieren**
+```bash
+brew install python@3.12
+brew install python-tk@3.12
+```
+
+**2. Virtuelle Umgebung erstellen und aktivieren**
+```bash
+/opt/homebrew/bin/python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+**3. Abhängigkeiten installieren**
+```bash
+pip install -r requirements.txt
+```
+
+**4. Programm starten**
+```bash
+python3 gui.py
+```
+
 ## Funktionsweise
 Dieses Programm berechnet die Flugbahnen iterativ Schritt für Schritt beginnend zum Zeitpunkt, wenn das Projektil das Rohr verlässt. Es nähert somit die aussenballistischen Einflüsse auf die Flugbahn an. Dabei werden folgende Annahmen getroffen:
 
